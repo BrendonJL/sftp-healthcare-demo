@@ -1,0 +1,14 @@
+# Generated outputs
+*.png
+transfer.log
+
+# GPG artifacts
+*.gpg
+MANIFEST.sha256
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
