@@ -1,10 +1,20 @@
-# SFTP Healthcare Integration Demo
+# Healthcare Integration Demo
 
-A full end-to-end SFTP integration pipeline for healthcare EDI data, built to demonstrate the technical skills required for a **Technical Implementation Manager** role in healthtech.
+Two end-to-end integration demos — **SFTP + EDI** (file-based) and **FHIR R4 API** (REST-based) — built to demonstrate the technical skills required for a **Technical Implementation Manager** role in healthtech.
 
-This project simulates a realistic bidirectional file exchange between a trading partner (host machine) and an integration server (containerized SFTP server), processing infusion therapy claims and admissions data with enterprise-grade security.
+Both demos use the same infusion therapy dataset (5 patients, 5 claims, $21,800 total) to show that the clinical data stays consistent regardless of the transport method.
 
-<!-- TODO: Add demo video here -->
+## Demo Videos
+
+**SFTP + EDI Pipeline:**
+
+<!-- Paste SFTP demo video URL below -->
+
+
+**FHIR R4 API Integration:**
+
+<!-- Paste FHIR demo video URL below -->
+
 
 ---
 
@@ -20,10 +30,13 @@ This project simulates a realistic bidirectional file exchange between a trading
 | Automation | Automated batch transfer script with encrypt-transfer-verify-cleanup pipeline |
 | Documentation | Demo runner presents the entire pipeline in a step-by-step presentable format |
 | Root Cause Analysis | Debugged real technical failures throughout the build (see [Debugging Log](#debugging-log)) |
+| API Integrations | FHIR R4 REST client with CRUD operations, search queries, and _include optimization |
 
 ---
 
-## Architecture
+## Demo 1: SFTP + EDI Pipeline
+
+### Architecture
 
 ```
 HOST (Trading Partner)                      DISTROBOX (Integration Server)
@@ -192,12 +205,72 @@ Real technical issues encountered and resolved during the build. These demonstra
 
 ---
 
+## Demo 2: FHIR R4 API Integration
+
+### Overview
+
+A Python FHIR R4 client that creates, queries, and visualizes healthcare resources against a live FHIR server. Demonstrates modern API-based integration as a complement to the file-based SFTP pipeline above.
+
+### FHIR Resources Created
+
+| Resource | Purpose | Count |
+|:--|:--|--:|
+| Organization | Provider facility (Infusion Therapy Partners LLC) | 1 |
+| Practitioner | Attending physicians with NPI identifiers | 5 |
+| Patient | Member demographics and MRN identifiers | 5 |
+| Coverage | Insurance eligibility — payer, plan, period | 5 |
+| Claim | Professional claims with ICD-10, CPT, and J-codes | 5 |
+
+### Search Queries Demonstrated
+
+1. **Patient by name** — basic member lookup
+2. **Claims by patient** — retrieve billing history for a member
+3. **Coverage by beneficiary** — eligibility verification (payer, plan status, period)
+4. **Claims with `_include`** — fetch Claims + linked Patients in a single request (eliminates N+1 queries)
+5. **Aggregate claims summary** — cross-patient reporting with totals
+
+### Pipeline Steps
+
+1. Verify FHIR server connectivity via CapabilityStatement (`GET /metadata`)
+2. Seed all resources in dependency order with idempotent create (handles duplicates and soft-deletes)
+3. Execute FHIR search queries demonstrating search parameters, references, and `_include`
+4. Generate matplotlib dashboard from live API data
+5. Clean up all created resources from the test server
+
+### FHIR API Project Structure
+
+```
+fhir-api/
+├── fhir_client.py          # FHIR R4 REST client with request logging
+├── seed_resources.py        # Idempotent resource seeder (create or find)
+├── query_demo.py            # FHIR search and query demonstrations
+├── generate_dashboard.py    # API-sourced matplotlib dashboard
+└── fhir_demo_run.py         # One-command demo runner
+```
+
+---
+
+## Why Both Demos
+
+| | SFTP + EDI (Demo 1) | FHIR API (Demo 2) |
+|:--|:--|:--|
+| **Transport** | Batch file transfer over SSH | Real-time REST API calls |
+| **Data Format** | X12 837P, HL7 v2.5.1 ADT | FHIR R4 JSON resources |
+| **When Used** | Bulk eligibility feeds, claims batches | Real-time eligibility checks, on-demand queries |
+| **Healthcare Adoption** | Current industry standard | Mandated by CMS interoperability rules, growing |
+| **Security** | PGP encryption + SSH tunnel | HTTPS + OAuth 2.0 (production) |
+
+The same 5 patients, same diagnoses, same drugs, same charges appear in both demos — proving the data is consistent regardless of integration method.
+
+---
+
 ## Tech Stack
 
 - **SFTP Server:** OpenSSH (containerized in distrobox/podman)
 - **Encryption:** GnuPG (RSA 4096 for PGP, Ed25519 for SSH)
-- **Automation:** Bash (batch transfer, checksums, audit logging)
-- **EDI Parsing:** Python 3 (custom X12 837P + HL7 ADT parser)
-- **Visualization:** Matplotlib
+- **FHIR Client:** Python 3 + requests (against HAPI FHIR R4 public test server)
+- **Automation:** Bash (SFTP pipeline), Python (FHIR pipeline)
+- **EDI Parsing:** Custom X12 837P + HL7 ADT parser
+- **Visualization:** Matplotlib (both demos)
 - **Container:** Distrobox + Podman (CachyOS v3 image)
 - **Host OS:** ZenaOS 43 (Fedora Atomic)

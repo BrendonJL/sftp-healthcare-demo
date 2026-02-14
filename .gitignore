@@ -10,5 +10,8 @@ MANIFEST.sha256
 __pycache__/
 *.pyc
 
+# FHIR demo generated files
+created_resource_ids.json
+
 # OS
 .DS_Store
