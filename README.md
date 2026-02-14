@@ -9,13 +9,13 @@ Both demos use the same infusion therapy dataset (5 patients, 5 claims, $21,800 
 **SFTP + EDI Pipeline:**
 
 <!-- Paste SFTP demo video URL below -->
-
+https://github.com/user-attachments/assets/959c2e82-cea6-472d-afce-5e9d6e5db457
 
 **FHIR R4 API Integration:**
 
 <!-- Paste FHIR demo video URL below -->
 
-
+https://github.com/user-attachments/assets/689225e0-c9e5-484f-ab99-ee0407caf983
 ---
 
 ## What This Demonstrates
